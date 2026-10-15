@@ -1,0 +1,19 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+backend/.venv/
+
+# Environment secrets
+.env
+**/.env
+**/.env.*
+!**/.env.example
+
+# Generated files
+.ipynb_checkpoints/
+.vscode/
+backend/data/processed/*
