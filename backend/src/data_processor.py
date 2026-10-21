@@ -18,6 +18,7 @@ REQUIRED_COLUMNS = [
     "refund_amount",
 ]
 
+
 def load_transactions():
     if not RAW_FILE.exists():
         raise FileNotFoundError(
@@ -39,7 +40,6 @@ def load_transactions():
         )
 
     return df
-
 
 def inspect_data(df):
     print("\n--- Dataset Preview ---")
@@ -69,34 +69,27 @@ def clean_transactions(df):
         df["timestamp"], errors="coerce"
     )
 
-    # Amount columns ko numeric banao
     for column in ["amount", "refund_amount"]:
         df[column] = pd.to_numeric(
             df[column], errors="coerce"
         )
 
-    # Text fields ke extra spaces remove karo
     for column in [
         "transaction_id", "status",
         "payment_method", "gateway", "region"
     ]:
         df[column] = df[column].astype("string").str.strip()
 
-    # Status ko consistent lowercase format mein rakho
     df["status"] = df["status"].str.lower()
 
-    # Non-refunded transactions mein missing refund ko zero maano
     non_refunded = df["status"].isin(["success", "failed"])
     missing_refund = non_refunded & df["refund_amount"].isna()
     df.loc[missing_refund, "refund_amount"] = 0
 
-    # Blank transaction IDs ko missing value treat karo
     df["transaction_id"] = df["transaction_id"].replace("", pd.NA)
 
-    # Allowed transaction statuses
     valid_statuses = ["success", "failed", "refunded"]
 
-    # Valid records ke rules
     valid_rows = (
         df["transaction_id"].notna()
         & df["timestamp"].notna()
@@ -110,10 +103,8 @@ def clean_transactions(df):
 
     invalid_count = int((~valid_rows).sum())
 
-    # Invalid records ko exclude karo
     cleaned_df = df.loc[valid_rows].copy()
 
-    # Duplicate transaction IDs count karo aur remove karo
     duplicate_count = int(
         cleaned_df["transaction_id"].duplicated().sum()
     )
@@ -122,7 +113,6 @@ def clean_transactions(df):
         subset=["transaction_id"], keep="first"
     ).copy()
 
-    # Cleaning summary
     print("\n--- Cleaning Summary ---")
     print("Original rows:", original_rows)
     print("Invalid rows removed:", invalid_count)
@@ -133,33 +123,25 @@ def clean_transactions(df):
 
 
 def save_processed_data(df):
-    # Output folder nahi hai toh create karo
     PROCESSED_FILE.parent.mkdir(
         parents=True, exist_ok=True
     )
 
-    # DataFrame ko CSV mein save karo
     df.to_csv(PROCESSED_FILE, index=False)
 
     print("\nCleaned dataset saved successfully!")
     print("Output path:", PROCESSED_FILE)
 
 
-
 def main():
-    # Step 1: Raw dataset load karo
     df = load_transactions()
 
-    # Step 2: Original data inspect karo
     inspect_data(df)
 
-    # Step 3: Dataset clean aur validate karo
     cleaned_df = clean_transactions(df)
 
-    # Step 4: Cleaned dataset save karo
     save_processed_data(cleaned_df)
 
-    # Step 5: Cleaned data ki preview
     print("\n--- Cleaned Dataset Preview ---")
     print(cleaned_df.head())
 
