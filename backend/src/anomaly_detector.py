@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 
@@ -13,7 +12,7 @@ INPUT_FILE = (
 OUTPUT_FILE = (
     BASE_DIR / "data" / "processed"
     / "transactions_anomalies.csv"
-)
+)                 
 
 
 def load_data():
@@ -84,7 +83,6 @@ def detect_anomalies(df):
     )
 
     model.fit(features)
-
     predictions = model.predict(features)
 
     results["anomaly_label"] = predictions

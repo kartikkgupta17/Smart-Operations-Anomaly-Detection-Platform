@@ -3,6 +3,12 @@ import numpy as np
 from sklearn.ensemble import IsolationForest
 from fastapi import FastAPI
 
+from src.analytics import (
+    load_cleaned_data,
+    calculate_kpis,
+    gateway_performance,
+)
+
 app = FastAPI(title="Smart Operations Platform")
 
 
@@ -22,3 +28,10 @@ def health_check():
         "ml_model": "IsolationForest",
         "status": "healthy"
     }
+@app.get("/analytics/kpis")
+def get_analytics_kpis():
+    df = load_cleaned_data()
+
+    kpis = calculate_kpis(df)
+
+    return kpis
